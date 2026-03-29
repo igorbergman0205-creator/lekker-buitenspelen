@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lekker Buitenspelen!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --rood:#FF3C5F; --oranje:#FF8C00; --geel:#FFD600;
+      --groen:#2ECC71; --blauw:#3B9EFF; --paars:#A855F7;
+      --roze:#FF6EB4; --donker:#1E1B4B; --licht:#FFF9EC; --wit:#ffffff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Nunito',sans-serif; background:var(--licht); color:var(--donker); overflow-x:hidden; }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:-1;
+      background-image:
+        radial-gradient(circle,#FF3C5F22 2px,transparent 2px),
+        radial-gradient(circle,#3B9EFF22 2px,transparent 2px),
+        radial-gradient(circle,#FFD60022 2px,transparent 2px),
+        radial-gradient(circle,#2ECC7122 2px,transparent 2px);
+      background-size:60px 60px,80px 80px,50px 50px,70px 70px;
+      background-position:0 0,30px 30px,15px 45px,45px 10px;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.9rem 2rem; background:var(--donker); border-bottom:4px solid var(--geel);
+      gap:1rem;
+    }
+    .logo { font-family:'Fredoka One',cursive; font-size:1.4rem; color:var(--geel); white-space:nowrap; }
+    .logo span { color:var(--roze); }
+    nav ul { list-style:none; display:flex; gap:1.2rem; flex-wrap:wrap; flex:1; justify-content:center; }
+    nav ul li a { color:#ccc; text-decoration:none; font-weight:700; font-size:.82rem; border-radius:20px; padding:.3rem .8rem; transition:background .2s,color .2s; }
+    nav ul li a:hover { background:var(--geel); color:var(--donker); }
+
+    /* ── LANGUAGE SWITCHER ── */
+    .lang-switcher { position:relative; flex-shrink:0; }
+    .lang-btn {
+      display:flex; align-items:center; gap:.5rem;
+      background:rgba(255,255,255,.1); border:2px solid rgba(255,255,255,.2);
+      border-radius:100px; padding:.4rem .9rem; cursor:pointer;
+      color:var(--wit); font-family:'Nunito',sans-serif; font-weight:800; font-size:.85rem;
+      transition:background .2s,border-color .2s; white-space:nowrap;
+    }
+    .lang-btn:hover { background:rgba(255,255,255,.18); border-color:var(--geel); }
+    .lang-btn .chevron { font-size:.65rem; opacity:.7; transition:transform .2s; }
+    .lang-switcher.open .lang-btn .chevron { transform:rotate(180deg); }
+    .lang-dropdown {
+      display:none; position:absolute; top:calc(100% + 8px); right:0;
+      background:var(--donker); border:2px solid rgba(255,255,255,.15);
+      border-radius:14px; overflow:hidden; min-width:160px;
+      box-shadow:0 12px 40px rgba(0,0,0,.4); z-index:200;
+    }
+    .lang-switcher.open .lang-dropdown { display:block; animation:dropIn .2s cubic-bezier(.34,1.56,.64,1) both; }
+    @keyframes dropIn { from{opacity:0;transform:translateY(-8px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);} }
+    .lang-option {
+      display:flex; align-items:center; gap:.75rem; padding:.75rem 1.1rem;
+      cursor:pointer; color:#ccc; font-weight:700; font-size:.9rem;
+      transition:background .15s,color .15s; border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .lang-option:last-child { border-bottom:none; }
+    .lang-option:hover { background:rgba(255,255,255,.08); color:var(--wit); }
+    .lang-option.active { color:var(--geel); background:rgba(255,214,0,.08); }
+    .lang-option .check { font-size:.85rem; opacity:0; margin-left:auto; }
+    .lang-option.active .check { opacity:1; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height:100vh; background:linear-gradient(160deg,#1E1B4B,#2D2A6E 60%,#3B3499);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:7rem 2rem 5rem; position:relative; overflow:hidden;
+    }
+    .shape { position:absolute; border-radius:50%; opacity:.15; animation:float linear infinite; }
+    .s1{width:180px;height:180px;background:var(--geel);top:10%;left:5%;animation-duration:9s;}
+    .s2{width:120px;height:120px;background:var(--roze);top:20%;right:8%;animation-duration:7s;animation-delay:-3s;}
+    .s3{width:90px;height:90px;background:var(--groen);bottom:20%;left:12%;animation-duration:11s;animation-delay:-5s;}
+    .s4{width:60px;height:60px;background:var(--blauw);bottom:30%;right:15%;animation-duration:8s;animation-delay:-1s;}
+    .s5{width:200px;height:200px;background:var(--oranje);top:50%;left:40%;animation-duration:13s;animation-delay:-6s;border-radius:30% 70% 70% 30%/30% 30% 70% 70%;}
+    @keyframes float { 0%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-30px) rotate(180deg);} 100%{transform:translateY(0) rotate(360deg);} }
+
+    .hero-sticker {
+      background:var(--geel); color:var(--donker); font-weight:800; font-size:.8rem;
+      letter-spacing:2px; text-transform:uppercase; padding:.4rem 1.2rem; border-radius:100px;
+      margin-bottom:1.5rem; display:inline-block;
+      animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; box-shadow:0 4px 0 #c9a700;
+    }
+    #hero h1 {
+      font-family:'Fredoka One',cursive; font-size:clamp(3rem,10vw,7.5rem); color:var(--wit);
+      line-height:1; animation:popIn .6s .1s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    #hero h1 .hl { color:var(--geel); display:inline-block; animation:wiggle 2s 1.5s ease-in-out infinite; }
+    .hero-sub {
+      font-size:1.15rem; color:#c0bcf0; max-width:500px; margin:1.2rem auto 0;
+      line-height:1.7; font-weight:600; animation:popIn .6s .2s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .hero-cta { margin-top:2.5rem; display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; animation:popIn .6s .3s cubic-bezier(.34,1.56,.64,1) both; }
+    .btn { padding:.9rem 2.2rem; border-radius:100px; font-family:'Nunito',sans-serif; font-weight:800; font-size:1rem; cursor:pointer; border:none; text-decoration:none; display:inline-block; transition:transform .15s,box-shadow .15s; }
+    .btn:hover { transform:translateY(-3px) scale(1.04); }
+    .btn-primary { background:var(--rood); color:var(--wit); box-shadow:0 5px 0 #b5002f; }
+    .btn-primary:hover { box-shadow:0 7px 0 #b5002f; }
+    .btn-secondary { background:var(--geel); color:var(--donker); box-shadow:0 5px 0 #c9a700; }
+    .btn-secondary:hover { box-shadow:0 7px 0 #c9a700; }
+    .bounce-arrow { position:absolute; bottom:2rem; font-size:2rem; animation:bounce 1.4s ease-in-out infinite; color:var(--geel); }
+
+    section { padding:5.5rem 2rem; }
+    .container { max-width:1100px; margin:0 auto; }
+    .section-chip { display:inline-block; background:var(--geel); color:var(--donker); font-weight:800; font-size:.75rem; letter-spacing:2px; text-transform:uppercase; padding:.3rem 1rem; border-radius:100px; margin-bottom:.75rem; }
+    .section-title { font-family:'Fredoka One',cursive; font-size:clamp(2.2rem,5vw,3.8rem); line-height:1.1; margin-bottom:.8rem; }
+    .section-sub { color:#666; max-width:560px; line-height:1.7; font-size:1rem; font-weight:600; }
+
+    /* ── OVER ── */
+    #over { background:var(--wit); }
+    .over-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; margin-top:3rem; }
+    .over-text p { line-height:1.8; color:#555; font-weight:600; margin-bottom:1rem; font-size:1.05rem; }
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .stat-card { border-radius:16px; padding:1.5rem 1.25rem; text-align:center; }
+    .stat-card:nth-child(1){background:#FFF0F3;border:3px solid var(--rood);}
+    .stat-card:nth-child(2){background:#FFFBE0;border:3px solid var(--geel);}
+    .stat-card:nth-child(3){background:#E8FFF2;border:3px solid var(--groen);}
+    .stat-card:nth-child(4){background:#EEF5FF;border:3px solid var(--blauw);}
+    .stat-card .num { font-family:'Fredoka One',cursive; font-size:2.8rem; line-height:1; }
+    .stat-card:nth-child(1) .num{color:var(--rood);}
+    .stat-card:nth-child(2) .num{color:var(--oranje);}
+    .stat-card:nth-child(3) .num{color:var(--groen);}
+    .stat-card:nth-child(4) .num{color:var(--blauw);}
+    .stat-card p { font-size:.82rem; font-weight:700; margin-top:.25rem; color:#555; }
+
+    /* ── BUITENSPEELKAARTEN ── */
+    #kaarten { background:linear-gradient(160deg,#1E1B4B,#2D2A6E); }
+    #kaarten .section-chip { background:var(--roze); color:var(--wit); }
+    #kaarten .section-title { color:var(--wit); }
+    #kaarten .section-sub { color:#aaa; }
+
+    .kaarten-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:2.5rem; margin-top:3rem;
+    }
+    .kaart-card {
+      background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.12);
+      border-radius:20px; overflow:hidden;
+      transition:transform .25s, box-shadow .25s;
+      cursor:pointer;
+    }
+    .kaart-card:hover { transform:translateY(-8px) rotate(-1deg); box-shadow:0 20px 50px rgba(0,0,0,.4); }
+    .kaart-card img {
+      width:100%; display:block;
+      transition:transform .4s;
+    }
+    .kaart-card:hover img { transform:scale(1.03); }
+    .kaart-label {
+      padding:1.2rem 1.5rem;
+      display:flex; align-items:center; gap:.75rem;
+    }
+    .kaart-label .kaart-icon { font-size:1.8rem; }
+    .kaart-label h3 { font-family:'Fredoka One',cursive; font-size:1.4rem; color:var(--wit); }
+    .kaart-label p { font-size:.82rem; color:#aaa; font-weight:600; margin-top:.2rem; }
+
+    /* Lightbox */
+    .lightbox {
+      display:none; position:fixed; inset:0; z-index:999;
+      background:rgba(0,0,0,.85); align-items:center; justify-content:center;
+      animation:fadeIn .2s ease;
+    }
+    .lightbox.active { display:flex; }
+    .lightbox img { max-width:90vw; max-height:90vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+    .lightbox-close {
+      position:absolute; top:1.5rem; right:2rem; font-size:2.5rem;
+      color:var(--wit); cursor:pointer; font-weight:800; line-height:1;
+      transition:transform .15s;
+    }
+    .lightbox-close:hover { transform:scale(1.2) rotate(90deg); }
+    @keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
+
+    /* ── QR CODE ── */
+    #qr { background:var(--wit); }
+    .qr-wrapper {
+      margin-top:3rem;
+      display:grid; grid-template-columns:1fr auto; gap:4rem; align-items:center;
+    }
+    .qr-text h3 { font-family:'Fredoka One',cursive; font-size:2rem; color:var(--donker); margin-bottom:.75rem; }
+    .qr-text p { color:#555; line-height:1.8; font-weight:600; margin-bottom:1rem; font-size:1rem; }
+    .qr-steps { display:flex; flex-direction:column; gap:.75rem; margin-top:1.5rem; }
+    .qr-step {
+      display:flex; align-items:center; gap:1rem;
+      background:var(--licht); border-radius:12px; padding:.9rem 1.25rem;
+      border-left:4px solid var(--blauw);
+    }
+    .qr-step .step-num {
+      width:32px; height:32px; border-radius:50%; background:var(--blauw);
+      color:var(--wit); font-weight:800; font-size:.9rem;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .qr-step span { font-weight:700; color:var(--donker); font-size:.9rem; }
+
+    .qr-box {
+      display:flex; flex-direction:column; align-items:center; gap:1.25rem;
+    }
+    .qr-frame {
+      background:var(--donker); border-radius:20px; padding:1.5rem;
+      box-shadow:0 12px 40px rgba(30,27,75,.25);
+      display:flex; flex-direction:column; align-items:center; gap:1rem;
+    }
+    .qr-frame-label {
+      font-family:'Fredoka One',cursive; font-size:1rem; color:var(--geel); letter-spacing:1px; text-align:center;
+    }
+    #qrcode canvas, #qrcode img { border-radius:8px; }
+    .qr-url {
+      font-size:.75rem; color:#aaa; font-weight:700; letter-spacing:.5px; text-align:center;
+    }
+    .qr-badge {
+      background:var(--groen); color:var(--donker);
+      border-radius:100px; padding:.4rem 1rem;
+      font-size:.75rem; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+    }
+
+    /* ── GROEPSCHAT ── */
+    #chat { background:#FFF9EC; }
+    #chat .section-chip { background:var(--paars); color:var(--wit); }
+    .chat-parent-banner {
+      background:var(--donker); border-radius:16px; padding:1.25rem 1.75rem;
+      display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; max-width:680px;
+      border-left:5px solid var(--geel);
+    }
+    .chat-parent-banner .banner-icon { font-size:2rem; flex-shrink:0; }
+    .chat-parent-banner p { color:#bbb; font-size:.9rem; font-weight:600; line-height:1.5; }
+    .chat-parent-banner strong { color:var(--geel); }
+
+    .chat-wrapper { border:3px solid #eee; border-radius:20px; overflow:hidden; max-width:680px; box-shadow:0 8px 30px rgba(0,0,0,.07); }
+    .chat-header { background:var(--donker); padding:1rem 1.5rem; display:flex; align-items:center; gap:.75rem; }
+    .chat-header .dot { width:12px; height:12px; border-radius:50%; background:var(--groen); animation:pulse 2s infinite; }
+    .chat-header .title { color:var(--wit); font-weight:800; font-size:1rem; }
+    .chat-header small { color:#666; font-size:.78rem; margin-left:auto; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 3px rgba(46,204,113,.3);}50%{box-shadow:0 0 0 6px rgba(46,204,113,.1);} }
+    .chat-messages { height:380px; overflow-y:auto; padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:1rem; background:#f9f9f9; }
+    .chat-messages::-webkit-scrollbar{width:4px;}
+    .chat-messages::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px;}
+    .msg { display:flex; gap:.75rem; max-width:90%; }
+    .msg.own { align-self:flex-end; flex-direction:row-reverse; }
+    .avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.95rem; flex-shrink:0; color:var(--wit); }
+    .bubble { background:var(--wit); border:2px solid #eee; padding:.65rem 1rem; border-radius:16px 16px 16px 4px; font-size:.88rem; line-height:1.5; color:var(--donker); font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    .msg.own .bubble { background:var(--blauw); color:var(--wit); border:none; border-radius:16px 16px 4px 16px; }
+    .bubble small { display:block; font-size:.7rem; margin-top:.3rem; opacity:.55; }
+    .bubble .role-tag { display:inline-block; font-size:.6rem; font-weight:800; background:rgba(255,255,255,.2); border-radius:100px; padding:.1rem .5rem; margin-right:.3rem; vertical-align:middle; }
+    .msg:not(.own) .role-tag { background:var(--geel); color:var(--donker); }
+    .chat-input { display:flex; gap:.75rem; padding:1rem 1.25rem; border-top:2px solid #eee; background:var(--wit); }
+    .chat-input input { flex:1; border:2px solid #eee; border-radius:100px; padding:.65rem 1.2rem; font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:600; outline:none; transition:border-color .2s; }
+    .chat-input input:focus { border-color:var(--blauw); }
+    .chat-input button { background:var(--blauw); color:var(--wit); border:none; border-radius:100px; padding:.65rem 1.4rem; font-family:'Nunito',sans-serif; font-weight:800; font-size:.9rem; cursor:pointer; box-shadow:0 4px 0 #1a6fd4; transition:transform .1s; }
+    .chat-input button:hover { transform:translateY(-2px); }
+
+    /* ── POSTER ── */
+    #poster { background:linear-gradient(160deg,#1E1B4B,#2D2A6E); }
+    #poster .section-chip{background:var(--groen);color:var(--donker);}
+    #poster .section-title{color:var(--wit);}
+    #poster .section-sub{color:#999;}
+    .poster-card { background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.1); border-radius:24px; padding:3rem; margin-top:3rem; display:grid; grid-template-columns:1fr auto; gap:3rem; align-items:center; }
+    .poster-card h3 { font-family:'Fredoka One',cursive; font-size:2rem; color:var(--wit); margin-bottom:.75rem; }
+    .poster-card p { color:#aaa; line-height:1.7; margin-bottom:1rem; font-weight:600; font-size:.95rem; }
+    .poster-preview { width:190px; height:270px; background:var(--wit); border-radius:12px; display:flex; flex-direction:column; align-items:center; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.4); }
+    .p-top { width:100%; background:linear-gradient(135deg,var(--rood),var(--oranje)); padding:1rem .75rem .75rem; text-align:center; }
+    .p-top .ptitle { font-family:'Fredoka One',cursive; font-size:.95rem; color:var(--wit); line-height:1.2; }
+    .p-body { padding:.75rem; width:100%; flex:1; }
+    .p-row { display:flex; align-items:center; gap:.4rem; font-size:.65rem; font-weight:700; color:var(--donker); padding:.3rem 0; border-bottom:1px solid #f0f0f0; }
+
+    footer { background:var(--donker); text-align:center; padding:2rem; font-size:.85rem; color:#555; font-weight:700; }
+    footer span { color:var(--geel); }
+
+    @keyframes popIn { from{opacity:0;transform:scale(.8) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);} }
+    @keyframes wiggle { 0%,100%{transform:rotate(-2deg);}50%{transform:rotate(2deg);} }
+    @keyframes bounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(8px);} }
+
+    @media(max-width:768px){
+      nav ul{display:none;}
+      .over-grid,.qr-wrapper,.poster-card{grid-template-columns:1fr;gap:2rem;}
+      .kaarten-grid{grid-template-columns:1fr;}
+      .qr-box{align-items:flex-start;}
+      .poster-preview{width:100%;height:auto;}
+      .p-body{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+  <img id="lightbox-img" src="" alt="Buitenspeelkaart" />
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo">Lekker<span>Buitenspelen</span> 🌳</div>
+  <ul>
+    <li><a href="#over" data-i18n="nav_over">Over</a></li>
+    <li><a href="#kaarten" data-i18n="nav_kaarten">Speelkaarten</a></li>
+    <li><a href="#qr" data-i18n="nav_qr">QR-code</a></li>
+    <li><a href="#chat" data-i18n="nav_chat">Groepschat</a></li>
+    <li><a href="#poster" data-i18n="nav_poster">Poster</a></li>
+  </ul>
+  <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-btn" onclick="toggleLangMenu()">
+      <span id="currentFlag">🇳🇱</span>
+      <span id="currentLangLabel">NL</span>
+      <span class="chevron">▼</span>
+    </button>
+    <div class="lang-dropdown" id="langDropdown">
+      <div class="lang-option active" onclick="setLang('nl')" id="opt-nl">
+        <span>🇳🇱</span><span class="lang-name">Nederlands</span><span class="check">✓</span>
+      </div>
+      <div class="lang-option" onclick="setLang('en')" id="opt-en">
+        <span>🇬🇧</span><span class="lang-name">English</span><span class="check">✓</span>
+      </div>
+      <div class="lang-option" onclick="setLang('uk')" id="opt-uk">
+        <span>🇺🇦</span><span class="lang-name">Українська</span><span class="check">✓</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="shape s1"></div><div class="shape s2"></div>
+  <div class="shape s3"></div><div class="shape s4"></div><div class="shape s5"></div>
+  <span class="hero-sticker" data-i18n="hero_tag">🎉 Hybride evenement voor basisschoolkinderen</span>
+  <h1 data-i18n-html="hero_h1">WORD GEEN<br><span class="hl">ZITKAMPIOEN!</span></h1>
+  <p class="hero-sub" data-i18n="hero_sub">Jij zit te veel op school! Kom mee bewegen en ontdek hoe leuk buitenspelen is. 💪🌳</p>
+  <div class="hero-cta">
+    <a href="#kaarten" class="btn btn-primary" data-i18n="hero_btn1">🃏 Bekijk speelkaarten</a>
+    <a href="#chat" class="btn btn-secondary" data-i18n="hero_btn2">💬 Join de groepschat</a>
+  </div>
+  <div class="bounce-arrow">👇</div>
+</section>
+
+<!-- OVER -->
+<section id="over">
+  <div class="container">
+    <span class="section-chip" data-i18n="over_chip">🌟 Over het evenement</span>
+    <h2 class="section-title" data-i18n-html="over_title">Bewegen is<br>super leuk!</h2>
+    <p class="section-sub" data-i18n="over_sub">Of je nu op school meedoet of thuis via de computer — ons evenement is voor iedereen!</p>
+    <div class="over-grid">
+      <div class="over-text">
+        <p data-i18n-html="over_p1">Wist je dat je op school al snel <strong>6 uur per dag</strong> zit? Dat is heel veel! Je lichaam houdt veel meer van bewegen dan van stilzitten. 🪑😴</p>
+        <p data-i18n-html="over_p2">Tijdens ons evenement leer je <strong>leuke buitenspelen</strong> die je samen met je vriendjes kunt doen. Spelkaarten met ideeën neem je gewoon mee naar buiten!</p>
+        <p data-i18n-html="over_p3">Na het evenement neem je een <strong>poster mee</strong> naar huis. Ouders kunnen via de groepschat meedoen en ervaringen delen! 🎯</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num">6u+</div><p data-i18n="stat1">Zitten op een schooldag</p></div>
+        <div class="stat-card"><div class="num">5</div><p data-i18n="stat2">Minuten buiten is al genoeg!</p></div>
+        <div class="stat-card"><div class="num">100%</div><p data-i18n="stat3">Meedoen zonder sportkleding</p></div>
+        <div class="stat-card"><div class="num">😄</div><p data-i18n="stat4">Meer energie na het bewegen!</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUITENSPEELKAARTEN -->
+<section id="kaarten">
+  <div class="container">
+    <span class="section-chip" data-i18n="kaart_chip">🃏 Doe mee!</span>
+    <h2 class="section-title" data-i18n-html="kaart_title">De Buitenspeel­kaarten</h2>
+    <p class="section-sub" data-i18n="kaart_sub">Klik op een kaart om hem groter te zien. Pak de kaart erbij en ga lekker buiten spelen!</p>
+    <div class="kaarten-grid">
+
+      <div class="kaart-card" onclick="openLightbox('kaart1.png')">
+        <img src="kaart1.png" alt="Buitenspeelkaart 1 — Stoepkrijten, tikspelen en meer" />
+        <div class="kaart-label">
+          <span class="kaart-icon">🎨</span>
+          <div>
+            <h3 data-i18n="kaart1_title">Buitenspeelkaart 1</h3>
+            <p data-i18n="kaart1_desc">Stoepkrijten, tikspelen, knikkeren en meer!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="kaart-card" onclick="openLightbox('kaart2.png')">
+        <img src="kaart2.png" alt="Buitenspeelkaart 2 — Touwtje springen" />
+        <div class="kaart-label">
+          <span class="kaart-icon">🪢</span>
+          <div>
+            <h3 data-i18n="kaart2_title">Buitenspeelkaart 2</h3>
+            <p data-i18n="kaart2_desc">Touwtje springen met liedjes en spelregels!</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- QR CODE -->
+<section id="qr">
+  <div class="container">
+    <span class="section-chip" data-i18n="qr_chip">📱 Voor ouders</span>
+    <h2 class="section-title" data-i18n-html="qr_title">Scan de<br>QR-code!</h2>
+    <p class="section-sub" data-i18n="qr_sub">Ouders kunnen via deze QR-code de website bezoeken en deelnemen aan de groepschat om ervaringen en tips te delen.</p>
+    <div class="qr-wrapper">
+      <div class="qr-text">
+        <h3 data-i18n="qr_h3">Zo werkt het 👇</h3>
+        <div class="qr-steps">
+          <div class="qr-step">
+            <div class="step-num">1</div>
+            <span data-i18n="qr_step1">Open de camera-app op je telefoon 📷</span>
+          </div>
+          <div class="qr-step">
+            <div class="step-num">2</div>
+            <span data-i18n="qr_step2">Richt de camera op de QR-code hiernaast</span>
+          </div>
+          <div class="qr-step">
+            <div class="step-num">3</div>
+            <span data-i18n="qr_step3">Tik op de link die verschijnt 🔗</span>
+          </div>
+          <div class="qr-step">
+            <div class="step-num">4</div>
+            <span data-i18n="qr_step4">Scroll naar de groepschat en doe mee! 💬</span>
+          </div>
+        </div>
+      </div>
+      <div class="qr-box">
+        <div class="qr-frame">
+          <div class="qr-frame-label" data-i18n="qr_frame_label">🌳 Lekker Buitenspelen</div>
+          <div id="qrcode"></div>
+          <div class="qr-url" id="qr-url-label">lekkerbuitenspelen.nl</div>
+        </div>
+        <span class="qr-badge" data-i18n="qr_badge">✅ Scan &amp; meedoen</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GROEPSCHAT -->
+<section id="chat">
+  <div class="container">
+    <span class="section-chip" data-i18n="chat_chip">💬 Ouders &amp; kinderen</span>
+    <h2 class="section-title" data-i18n="chat_title">Groepschat</h2>
+    <p class="section-sub" data-i18n="chat_sub">Ouders delen ervaringen en tips, kinderen vertellen over hun buitenspelavonturen!</p>
+
+    <div class="chat-parent-banner">
+      <span class="banner-icon">👨‍👩‍👧</span>
+      <p data-i18n-html="chat_banner"><strong>Voor ouders:</strong> Scan de QR-code om toegang te krijgen tot deze chat. Deel hier tips, ervaringen en foto's van buitenspelen!</p>
+    </div>
+
+    <div class="chat-wrapper">
+      <div class="chat-header">
+        <div class="dot"></div>
+        <span class="title">🌳 <span data-i18n="chat_header_title">Lekker Buitenspelen — Groepschat</span></span>
+        <small><span data-i18n="chat_online">5 online</span></small>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg">
+          <div class="avatar" style="background:#FF3C5F;">M</div>
+          <div class="bubble"><span class="role-tag" data-i18n="role_parent">Ouder</span> <span data-i18n="chat_msg1_text">Mijn dochter doet de stoepkrijt-kaart elke middag met de buurkinderen! Zo leuk 🎨</span><small>Mama van Lisa • 14:05</small></div>
+        </div>
+        <div class="msg">
+          <div class="avatar" style="background:#2ECC71;">P</div>
+          <div class="bubble"><span class="role-tag" data-i18n="role_parent">Ouder</span> <span data-i18n="chat_msg2_text">Wij hebben een touwtje gekocht na de speelkaart. Ze springen nu elke dag! 🪢</span><small>Papa van Tom • 14:18</small></div>
+        </div>
+        <div class="msg">
+          <div class="avatar" style="background:#3B9EFF;">S</div>
+          <div class="bubble"><span class="role-tag" data-i18n="role_child">Kind</span> <span data-i18n="chat_msg3_text">Ik heb 10 tellen in de rimboe gedaan met mijn klas! Echt super gaaf 🌴</span><small>Sophie • 15:02</small></div>
+        </div>
+        <div class="msg">
+          <div class="avatar" style="background:#FF8C00;">M</div>
+          <div class="bubble"><span class="role-tag" data-i18n="role_parent">Ouder</span> <span data-i18n="chat_msg4_text">Tip voor iedereen: de Hula Hoop kaart is perfect voor een regenachtige dag in de gang 😄</span><small>Mama van Emma • 15:30</small></div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chat-input" data-i18n-placeholder="chat_placeholder" placeholder="Deel een tip of ervaring... 😄" />
+        <button onclick="sendMessage()" data-i18n="chat_send">Stuur 🚀</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSTER -->
+<section id="poster">
+  <div class="container">
+    <span class="section-chip" data-i18n="poster_chip">📋 Meenemen!</span>
+    <h2 class="section-title" data-i18n-html="poster_title">De bewegings­poster</h2>
+    <p class="section-sub" data-i18n="poster_sub">Elke deelnemer krijgt een kleurrijke poster om thuis of in de klas op te hangen.</p>
+    <div class="poster-card">
+      <div>
+        <h3 data-i18n="poster_h3">Hang 'm ergens op! 📌</h3>
+        <p data-i18n="poster_p1">De poster heeft alle buitenspelideeën op een rijtje. Zo vergeet je nooit meer wat je kunt doen als je buiten speelt!</p>
+        <p data-i18n="poster_p2">Beschikbaar in A4 en A3 formaat. Hangt super op je slaapkamerdeur of in de klas!</p>
+        <a href="#" class="btn btn-secondary" onclick="posterAlert(); return false;" data-i18n="poster_btn">📥 Download poster (binnenkort)</a>
+      </div>
+      <div class="poster-preview">
+        <div class="p-top"><div class="ptitle" data-i18n="poster_preview_title">LEKKER BUITENSPELEN! 🌳</div></div>
+        <div class="p-body">
+          <div class="p-row">🎨 Stoepkrijten</div>
+          <div class="p-row">🪢 Touwtje springen</div>
+          <div class="p-row">⚽ Voetballen</div>
+          <div class="p-row">🔵 Knikkeren</div>
+          <div class="p-row">🏃 Tikkertje</div>
+          <div class="p-row">🌀 Hula Hoop</div>
+          <div style="font-size:.6rem;color:#aaa;text-align:center;margin-top:.5rem;font-weight:700;" data-i18n="poster_footer">Speel elke dag buiten! 🌳</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><span data-i18n="footer_text">Gemaakt door vijf enthousiaste studenten 💪</span> &nbsp;|&nbsp; <span data-i18n="footer_motto" style="color:var(--geel);">Lekker Buitenspelen! 🌳</span></p>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+//  TRANSLATIONS
+// ══════════════════════════════════════════
+const translations = {
+  nl: {
+    nav_over:'Over', nav_kaarten:'Speelkaarten', nav_qr:'QR-code', nav_chat:'Groepschat', nav_poster:'Poster',
+    hero_tag:'🎉 Hybride evenement voor basisschoolkinderen',
+    hero_h1:'WORD GEEN<br><span class="hl">ZITKAMPIOEN!</span>',
+    hero_sub:'Jij zit te veel op school! Kom mee bewegen en ontdek hoe leuk buitenspelen is. 💪🌳',
+    hero_btn1:'🃏 Bekijk speelkaarten', hero_btn2:'💬 Join de groepschat',
+    over_chip:'🌟 Over het evenement',
+    over_title:'Bewegen is<br>super leuk!',
+    over_sub:'Of je nu op school meedoet of thuis via de computer — ons evenement is voor iedereen!',
+    over_p1:'Wist je dat je op school al snel <strong>6 uur per dag</strong> zit? Dat is heel veel! Je lichaam houdt veel meer van bewegen dan van stilzitten. 🪑😴',
+    over_p2:'Tijdens ons evenement leer je <strong>leuke buitenspelen</strong> die je samen met je vriendjes kunt doen. Spelkaarten met ideeën neem je gewoon mee naar buiten!',
+    over_p3:'Na het evenement neem je een <strong>poster mee</strong> naar huis. Ouders kunnen via de groepschat meedoen en ervaringen delen! 🎯',
+    stat1:'Zitten op een schooldag', stat2:'Minuten buiten is al genoeg!', stat3:'Meedoen zonder sportkleding', stat4:'Meer energie na het bewegen!',
+    kaart_chip:'🃏 Doe mee!',
+    kaart_title:'De Buitenspeel­kaarten',
+    kaart_sub:'Klik op een kaart om hem groter te zien. Pak de kaart erbij en ga lekker buiten spelen!',
+    kaart1_title:'Buitenspeelkaart 1', kaart1_desc:'Stoepkrijten, tikspelen, knikkeren en meer!',
+    kaart2_title:'Buitenspeelkaart 2', kaart2_desc:'Touwtje springen met liedjes en spelregels!',
+    qr_chip:'📱 Voor ouders',
+    qr_title:'Scan de<br>QR-code!',
+    qr_sub:'Ouders kunnen via deze QR-code de website bezoeken en deelnemen aan de groepschat om ervaringen en tips te delen.',
+    qr_h3:'Zo werkt het 👇',
+    qr_step1:'Open de camera-app op je telefoon 📷',
+    qr_step2:'Richt de camera op de QR-code hiernaast',
+    qr_step3:'Tik op de link die verschijnt 🔗',
+    qr_step4:'Scroll naar de groepschat en doe mee! 💬',
+    qr_frame_label:'🌳 Lekker Buitenspelen',
+    qr_badge:'✅ Scan & meedoen',
+    chat_chip:'💬 Ouders & kinderen', chat_title:'Groepschat',
+    chat_sub:'Ouders delen ervaringen en tips, kinderen vertellen over hun buitenspelavonturen!',
+    chat_banner:'<strong>Voor ouders:</strong> Scan de QR-code om toegang te krijgen tot deze chat. Deel hier tips, ervaringen en foto\'s van buitenspelen!',
+    chat_header_title:'Lekker Buitenspelen — Groepschat', chat_online:'5 online',
+    role_parent:'Ouder', role_child:'Kind',
+    chat_msg1_text:'Mijn dochter doet de stoepkrijt-kaart elke middag met de buurkinderen! Zo leuk 🎨',
+    chat_msg2_text:'Wij hebben een touwtje gekocht na de speelkaart. Ze springen nu elke dag! 🪢',
+    chat_msg3_text:'Ik heb 10 tellen in de rimboe gedaan met mijn klas! Echt super gaaf 🌴',
+    chat_msg4_text:'Tip voor iedereen: de Hula Hoop kaart is perfect voor een regenachtige dag in de gang 😄',
+    chat_placeholder:'Deel een tip of ervaring... 😄', chat_send:'Stuur 🚀',
+    poster_chip:'📋 Meenemen!', poster_title:'De bewegings­poster',
+    poster_sub:'Elke deelnemer krijgt een kleurrijke poster om thuis of in de klas op te hangen.',
+    poster_h3:'Hang \'m ergens op! 📌',
+    poster_p1:'De poster heeft alle buitenspelideeën op een rijtje. Zo vergeet je nooit meer wat je kunt doen!',
+    poster_p2:'Beschikbaar in A4 en A3 formaat. Hangt super op je slaapkamerdeur of in de klas!',
+    poster_btn:'📥 Download poster (binnenkort)',
+    poster_preview_title:'LEKKER BUITENSPELEN! 🌳',
+    poster_footer:'Speel elke dag buiten! 🌳',
+    footer_text:'Gemaakt door vijf enthousiaste studenten 💪',
+    footer_motto:'Lekker Buitenspelen! 🌳',
+    poster_alert:'De poster kun je ophalen tijdens het evenement! 🎉',
+    me_label:'Jij',
+  },
+  en: {
+    nav_over:'About', nav_kaarten:'Play Cards', nav_qr:'QR Code', nav_chat:'Group Chat', nav_poster:'Poster',
+    hero_tag:'🎉 Hybrid event for primary school children',
+    hero_h1:"DON'T BE A<br><span class=\"hl\">SITTING CHAMP!</span>",
+    hero_sub:'You sit too much at school! Come and move and discover how fun playing outside is. 💪🌳',
+    hero_btn1:'🃏 See play cards', hero_btn2:'💬 Join the group chat',
+    over_chip:'🌟 About the event',
+    over_title:'Moving is<br>super fun!',
+    over_sub:'Whether you join at school or from home — our event is for everyone!',
+    over_p1:'Did you know that at school you can sit for up to <strong>6 hours a day</strong>? That\'s a lot! Your body loves moving way more than sitting still. 🪑😴',
+    over_p2:'At our event you\'ll discover <strong>fun outdoor games</strong> you can play with your friends. Take the play cards outside and get moving!',
+    over_p3:'After the event you take a <strong>poster home</strong>. Parents can join the group chat to share experiences and tips! 🎯',
+    stat1:'Sitting on a school day', stat2:'Minutes outside is enough!', stat3:'Join without sports clothing', stat4:'More energy after moving!',
+    kaart_chip:'🃏 Join in!',
+    kaart_title:'The Outdoor<br>Play Cards',
+    kaart_sub:'Click a card to see it bigger. Grab the card and go play outside!',
+    kaart1_title:'Play Card 1', kaart1_desc:'Chalk drawing, tag, marbles and more!',
+    kaart2_title:'Play Card 2', kaart2_desc:'Jump rope with songs and rules!',
+    qr_chip:'📱 For parents',
+    qr_title:'Scan the<br>QR code!',
+    qr_sub:'Parents can use this QR code to visit the website and join the group chat to share experiences and tips.',
+    qr_h3:'How it works 👇',
+    qr_step1:'Open the camera app on your phone 📷',
+    qr_step2:'Point the camera at the QR code',
+    qr_step3:'Tap the link that appears 🔗',
+    qr_step4:'Scroll to the group chat and join in! 💬',
+    qr_frame_label:'🌳 Fun Outdoor Play',
+    qr_badge:'✅ Scan & join',
+    chat_chip:'💬 Parents & children', chat_title:'Group Chat',
+    chat_sub:'Parents share experiences and tips, children tell about their outdoor adventures!',
+    chat_banner:'<strong>For parents:</strong> Scan the QR code to access this chat. Share tips, experiences and photos of outdoor play!',
+    chat_header_title:'Fun Outdoor Play — Group Chat', chat_online:'5 online',
+    role_parent:'Parent', role_child:'Child',
+    chat_msg1_text:'My daughter does the chalk card every afternoon with the neighbourhood kids! So fun 🎨',
+    chat_msg2_text:'We bought a jump rope after the play card. They jump every day now! 🪢',
+    chat_msg3_text:'I played hide-and-seek with my whole class! Super awesome 🌴',
+    chat_msg4_text:'Tip for everyone: the Hula Hoop card is perfect for a rainy day in the hallway 😄',
+    chat_placeholder:'Share a tip or experience... 😄', chat_send:'Send 🚀',
+    poster_chip:'📋 Take it home!', poster_title:'The movement poster',
+    poster_sub:'Every participant gets a colourful poster to hang at home or in the classroom.',
+    poster_h3:'Hang it somewhere! 📌',
+    poster_p1:'The poster lists all outdoor play ideas so you\'ll never forget what to do outside!',
+    poster_p2:'Available in A4 and A3 format. Great on your bedroom door or in the classroom!',
+    poster_btn:'📥 Download poster (coming soon)',
+    poster_preview_title:'FUN OUTDOOR PLAY! 🌳',
+    poster_footer:'Play outside every day! 🌳',
+    footer_text:'Made by five enthusiastic students 💪',
+    footer_motto:'Fun Outdoor Play! 🌳',
+    poster_alert:'You can pick up the poster at the event! 🎉',
+    me_label:'You',
+  },
+  uk: {
+    nav_over:'Про нас', nav_kaarten:'Картки', nav_qr:'QR-код', nav_chat:'Групчат', nav_poster:'Постер',
+    hero_tag:'🎉 Гібридний захід для учнів початкової школи',
+    hero_h1:'НЕ БУДЬ<br><span class="hl">ЧЕМПІОНОМ З СИДІННЯ!</span>',
+    hero_sub:'Ти надто багато сидиш у школі! Рухайся та дізнайся, як весело гратися на вулиці. 💪🌳',
+    hero_btn1:'🃏 Дивитися картки', hero_btn2:'💬 Приєднатися до чату',
+    over_chip:'🌟 Про захід',
+    over_title:'Рухатися —<br>це супер весело!',
+    over_sub:'Хочеш прийти до школи чи приєднатися вдома — наш захід для всіх!',
+    over_p1:'Чи знаєш ти, що в школі можна просидіти до <strong>6 годин на день</strong>? Це дуже багато! Твоє тіло любить рух набагато більше, ніж сидіння. 🪑😴',
+    over_p2:'На нашому заході ти дізнаєшся про <strong>цікаві ігри на вулиці</strong>, які можна грати з друзями. Бери картки і йди гратися!',
+    over_p3:'Після заходу ти забереш <strong>постер додому</strong>. Батьки можуть долучитися до групового чату, щоб ділитися досвідом! 🎯',
+    stat1:'Сидіння за шкільний день', stat2:'Хвилин на вулиці достатньо!', stat3:'Брати участь без спортивної форми', stat4:'Більше енергії після руху!',
+    kaart_chip:'🃏 Долучайся!',
+    kaart_title:'Картки для<br>вуличних ігор',
+    kaart_sub:'Натисни на картку, щоб побачити її більшою. Бери картку і йди гратися на вулиці!',
+    kaart1_title:'Картка 1', kaart1_desc:'Малювання крейдою, квач, кульки та ін.!',
+    kaart2_title:'Картка 2', kaart2_desc:'Стрибки зі скакалкою з піснями та правилами!',
+    qr_chip:'📱 Для батьків',
+    qr_title:'Скануй<br>QR-код!',
+    qr_sub:'Батьки можуть використовувати цей QR-код, щоб відвідати сайт і приєднатися до групового чату.',
+    qr_h3:'Як це працює 👇',
+    qr_step1:'Відкрий камеру на своєму телефоні 📷',
+    qr_step2:'Наведи камеру на QR-код',
+    qr_step3:'Натисни на посилання, яке з\'явиться 🔗',
+    qr_step4:'Прокрути до групового чату і долучайся! 💬',
+    qr_frame_label:'🌳 Весело гратися на вулиці',
+    qr_badge:'✅ Сканувати і приєднатися',
+    chat_chip:'💬 Батьки та діти', chat_title:'Груповий чат',
+    chat_sub:'Батьки діляться досвідом і порадами, діти розповідають про ігри на вулиці!',
+    chat_banner:'<strong>Для батьків:</strong> Скануйте QR-код, щоб отримати доступ до цього чату. Діліться тут порадами, досвідом і фото!',
+    chat_header_title:'Весело на вулиці — Груповий чат', chat_online:'5 онлайн',
+    role_parent:'Батько/Мати', role_child:'Дитина',
+    chat_msg1_text:'Моя донька грає зі скрейдою щодня з сусідськими дітьми! Так весело 🎨',
+    chat_msg2_text:'Ми купили скакалку після картки. Вони тепер стрибають щодня! 🪢',
+    chat_msg3_text:'Я грала в хованки з усім класом! Дуже круто 🌴',
+    chat_msg4_text:'Порада всім: картка Hula Hoop ідеальна для дощового дня у коридорі 😄',
+    chat_placeholder:'Поділися порадою або досвідом... 😄', chat_send:'Надіслати 🚀',
+    poster_chip:'📋 Забери додому!', poster_title:'Постер руху',
+    poster_sub:'Кожен учасник отримує барвистий постер, щоб повісити вдома або в класі.',
+    poster_h3:'Повісь його десь! 📌',
+    poster_p1:'На постері є всі ідеї для вуличних ігор. Так ти ніколи не забудеш, що можна робити надворі!',
+    poster_p2:'Доступний у форматі A4 та A3. Чудово підійде на двері спальні або в класі!',
+    poster_btn:'📥 Завантажити постер (незабаром)',
+    poster_preview_title:'ВЕСЕЛО НА ВУЛИЦІ! 🌳',
+    poster_footer:'Грайся надворі щодня! 🌳',
+    footer_text:'Створено п\'ятьма ентузіастами-студентами 💪',
+    footer_motto:'Весело гратися на вулиці! 🌳',
+    poster_alert:'Постер можна забрати на заході! 🎉',
+    me_label:'Ти',
+  },
+};
+
+const langMeta = { nl:{flag:'🇳🇱',label:'NL'}, en:{flag:'🇬🇧',label:'EN'}, uk:{flag:'🇺🇦',label:'UA'} };
+let currentLang = 'nl';
+
+function applyTranslations(lang) {
+  const t = translations[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k] !== undefined) el.textContent = t[k];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const k = el.getAttribute('data-i18n-html');
+    if (t[k] !== undefined) el.innerHTML = t[k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.getAttribute('data-i18n-placeholder');
+    if (t[k] !== undefined) el.placeholder = t[k];
+  });
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('currentFlag').textContent = langMeta[lang].flag;
+  document.getElementById('currentLangLabel').textContent = langMeta[lang].label;
+  ['nl','en','uk'].forEach(l => document.getElementById('opt-'+l).classList.toggle('active', l === lang));
+  document.documentElement.lang = lang;
+  applyTranslations(lang);
+  closeLangMenu();
+}
+
+function toggleLangMenu() { document.getElementById('langSwitcher').classList.toggle('open'); }
+function closeLangMenu() { document.getElementById('langSwitcher').classList.remove('open'); }
+document.addEventListener('click', e => { if (!document.getElementById('langSwitcher').contains(e.target)) closeLangMenu(); });
+
+// ── Lightbox ──
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ── QR Code ──
+window.addEventListener('load', () => {
+  const siteUrl = window.location.href.split('#')[0];
+  new QRCode(document.getElementById('qrcode'), {
+    text: siteUrl,
+    width: 180,
+    height: 180,
+    colorDark: '#1E1B4B',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+  document.getElementById('qr-url-label').textContent = window.location.hostname || 'lekkerbuitenspelen.nl';
+});
+
+// ── Smooth scroll ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
+  });
+});
+
+// ── Chat ──
+const avatarColors = ['#FF3C5F','#3B9EFF','#2ECC71','#FF8C00','#A855F7','#FF6EB4'];
+const myColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+function getTime() { const n=new Date(); return `${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`; }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function sendMessage() {
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const box = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'msg own';
+  const me = translations[currentLang].me_label || 'Jij';
+  el.innerHTML = `<div class="avatar" style="background:${myColor};">J</div><div class="bubble">${escHtml(txt)}<small>${me} • ${getTime()}</small></div>`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+  inp.value = ''; inp.focus();
+}
+document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key==='Enter') sendMessage(); });
+
+const fakeMessages = {
+  nl:[
+    {name:'Papa van Roos',color:'#A855F7',init:'P',role:'Ouder',text:'Onze Roos kan nu 50 keer touwtjespringen!! Zo trots 🥹'},
+    {name:'Mama van Sem',color:'#2ECC71',init:'M',role:'Ouder',text:'Tip: neem de stoepkrijt-kaart mee naar de speeltuin, dat werkt perfect!'},
+    {name:'Nora',color:'#FF3C5F',init:'N',role:'Kind',text:'Ik heb Marco Polo gedaan in het zwembad 😂😂 SUPER GAAF'},
+  ],
+  en:[
+    {name:'Dad of Rose',color:'#A855F7',init:'D',role:'Parent',text:'Our Rose can now jump rope 50 times!! So proud 🥹'},
+    {name:'Mum of Sam',color:'#2ECC71',init:'M',role:'Parent',text:'Tip: bring the chalk card to the playground, it works perfectly!'},
+    {name:'Nora',color:'#FF3C5F',init:'N',role:'Child',text:'I played Marco Polo in the swimming pool 😂😂 SO COOL'},
+  ],
+  uk:[
+    {name:'Тато Рози',color:'#A855F7',init:'Т',role:'Батько/Мати',text:'Наша Роза тепер може стрибати 50 разів! Так пишаємося 🥹'},
+    {name:'Мама Сема',color:'#2ECC71',init:'М',role:'Батько/Мати',text:'Порада: візьміть картку з крейдою на майданчик — це чудово!'},
+    {name:'Нора',color:'#FF3C5F',init:'Н',role:'Дитина',text:'Я грала в Марко Поло в басейні 😂😂 ДУЖЕ КРУТО'},
+  ],
+};
+let fakeIdx = 0;
+setInterval(() => {
+  const msgs = fakeMessages[currentLang] || fakeMessages.nl;
+  const m = msgs[fakeIdx % msgs.length];
+  fakeIdx++;
+  const box = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'msg';
+  const roleLabel = translations[currentLang][m.role === 'Ouder' || m.role === 'Parent' || m.role === 'Батько/Мати' ? 'role_parent' : 'role_child'] || m.role;
+  el.innerHTML = `<div class="avatar" style="background:${m.color};">${m.init}</div><div class="bubble"><span class="role-tag">${roleLabel}</span> ${m.text}<small>${m.name} • ${getTime()}</small></div>`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+}, 9000);
+
+function posterAlert() { alert(translations[currentLang].poster_alert); }
+</script>
+</body>
+</html>
